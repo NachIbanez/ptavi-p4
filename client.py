@@ -7,13 +7,19 @@ Programa cliente UDP que abre un socket a un servidor
 import socket
 import sys
 
-SERVER = sys.argv[1]
-PORT = int(sys.argv[2])
+try:
+    SERVER = sys.argv[1]
+    PORT = int(sys.argv[2])
+    METHOD = sys.argv[3]
+    DIR_SIP = sys.argv[4]
+    EXPIRES = sys.argv[5]
+except IndexError:
+    sys.exit("Usage: client.py port register sip_address expires_value")
 
-if sys.argv[3] == "register":
-    dir_sip = sys.argv[4]
-    LINE = ("REGISTER sip:" + dir_sip + " SIP/2.0\r\n\r\n")
-    print(LINE)
+
+if METHOD == "register":
+
+    LINE = ("REGISTER sip:" + DIR_SIP + " SIP/2.0\r\n" + "Expires: " + str(EXPIRES) + "\r\n")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
         my_socket.connect((SERVER, PORT))
         my_socket.send(bytes(LINE, 'utf-8') + b'\r\n')
