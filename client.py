@@ -20,7 +20,6 @@ if sys.argv[3] == "register":
         data = my_socket.recv(1024)
         print('Recibido -- ', data.decode('utf-8'), end="")
 
-    print("Socket terminado.")
 else:
     LINE = " ".join(sys.argv[3:])
 
