@@ -5,7 +5,6 @@ import socketserver
 import sys
 import time
 import json
-import os
 
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
@@ -20,18 +19,17 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             if gmt_expires < gmt_actual:
                 del self.diccionario_registro[usuario]
         with open("registered.json", "w") as json_file:
-            json.dump(self.diccionario_registro, json_file)
+            json.dump(self.diccionario_registro, json_file, indent=4)
 
     def json2registered(self):
         try:
-            if os.stat("registered.json").st_size != 0:
-                with open("registered.json", "r") as json_file:
-                    self.diccionario_registro = json.loads(json_file)
-                    print("diccionario anterior:" + self.diccionario_registro)
+            with open("registered.json", "r") as json_file:
+                self.diccionario_registro = json.load(json_file)
         except:
             pass
 
     def handle(self):
+        self.json2registered()
         for line in self.rfile:
             line_decoded = line.decode('utf-8')
             if line_decoded[:line_decoded.find(" ")] == "REGISTER":
@@ -47,7 +45,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 gmt_expires = time.strftime(" GMT %Y-%m-%d %H:%M:%S", \
                                             time.gmtime(time.time() \
                                             + int(expires)))        
-                expires_seconds_gmt = time.gmtime(time.time() + int(expires))
                 self.diccionario_registro[direccion_sip].append(gmt_expires)
                 if int(expires) == 0:
                     del self.diccionario_registro[direccion_sip]       
