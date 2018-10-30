@@ -18,8 +18,8 @@ except IndexError:
 
 
 if METHOD == "register":
-
-    LINE = ("REGISTER " + DIR_SIP + " SIP/2.0\r\n" + "Expires: " + str(EXPIRES) + "\r\n")
+    LINE = ("REGISTER " + DIR_SIP + " SIP/2.0\r\n" + "Expires: " +
+            str(EXPIRES) + "\r\n")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
         my_socket.connect((SERVER, PORT))
         my_socket.send(bytes(LINE, 'utf-8') + b'\r\n')
