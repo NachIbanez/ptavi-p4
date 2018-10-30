@@ -12,6 +12,11 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     diccionario_registro = {}
 
     def register2json(self):
+        """
+        Comprueba si algún usuario del registro ha expirado
+        y lo borra, y después convierte nuestro registro, que es un
+        diccionario, en un fichero JSON
+        """
         usuarios = list(self.diccionario_registro)
         for usuario in usuarios:
             gmt_expires = self.diccionario_registro[usuario][1]
@@ -23,6 +28,11 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             json.dump(self.diccionario_registro, json_file, indent=4)
 
     def json2registered(self):
+        """
+        Comprueba que haya un fichero llamado registeed.json
+        en nuestro directorio, y si existe, mete su contenido
+        de los usuario registrados en un diccionario
+        """
         try:
             with open("registered.json", "r") as json_file:
                 self.diccionario_registro = json.load(json_file)
@@ -30,6 +40,13 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             pass
 
     def handle(self):
+        """
+        Maneja los mensajes que le llegan desde el cliente,
+        segun sea REGISTER o Expires la primera palabra que
+        encuentre en la línea, o incluye el usuario en el
+        diccionario o le mete el valor expires, y si éste es 0,
+        lo elimina del diccionario
+        """
         self.json2registered()
         for line in self.rfile:
             line_decoded = line.decode('utf-8')
@@ -40,7 +57,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     [self.client_address[0]]
                 self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
                 self.host, self.port = self.client_address[:2]
-                print("--" + line.decode('utf-8'), end="")
+                print("Recibido --> " + line.decode('utf-8'), end="")
                 print("Desde ip:puerto --> " + str(self.host) +
                       ":" + str(self.port), "\n")
             elif line_decoded[:line_decoded.find(" ")] == "Expires:":
@@ -57,11 +74,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
 
 if __name__ == "__main__":
-
     PORT = int(sys.argv[1])
     serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
     print("-SERVER ON-\r\n")
     try:
         serv.serve_forever()
     except KeyboardInterrupt:
-        print("Finalizado servidor")
+        print("-SERVER OFF-")
